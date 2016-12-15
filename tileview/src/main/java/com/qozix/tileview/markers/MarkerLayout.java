@@ -64,8 +64,15 @@ public class MarkerLayout extends ViewGroup {
   }
 
   public View addMarker( View view, int x, int y, Float aX, Float aY ) {
-    LayoutParams layoutParams = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, x, y, aX, aY );
-    return addMarker( view, layoutParams );
+    ViewGroup.LayoutParams defaultLayoutParams = view.getLayoutParams();
+    LayoutParams markerLayoutParams = (defaultLayoutParams != null)
+      ? generateLayoutParams(defaultLayoutParams)
+      : generateDefaultLayoutParams();
+    markerLayoutParams.x = x;
+    markerLayoutParams.y = y;
+    markerLayoutParams.anchorX = aX;
+    markerLayoutParams.anchorY = aY;
+    return addMarker( view, markerLayoutParams );
   }
 
     public View addMarker( View view, int x, int y, Float aX, Float aY , boolean rotatable) {
@@ -165,7 +172,7 @@ public class MarkerLayout extends ViewGroup {
   }
 
   @Override
-  protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
+  protected MarkerLayout.LayoutParams generateDefaultLayoutParams() {
     return new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0, 0 );
   }
 
@@ -175,7 +182,7 @@ public class MarkerLayout extends ViewGroup {
   }
 
   @Override
-  protected ViewGroup.LayoutParams generateLayoutParams( ViewGroup.LayoutParams layoutParams ) {
+  protected MarkerLayout.LayoutParams generateLayoutParams( ViewGroup.LayoutParams layoutParams ) {
     return new LayoutParams( layoutParams );
   }
 

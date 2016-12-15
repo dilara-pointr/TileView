@@ -10,6 +10,9 @@ import android.view.animation.AnimationUtils;
 import com.qozix.tileview.detail.DetailLevel;
 import com.qozix.tileview.geom.FloatMathHelper;
 import com.qozix.tileview.graphics.BitmapProvider;
+import com.qozix.tileview.graphics.BitmapRecycler;
+
+import java.lang.ref.WeakReference;
 
 import java.lang.ref.WeakReference;
 
@@ -58,6 +61,7 @@ public class Tile {
   private DetailLevel mDetailLevel;
 
   private WeakReference<TileRenderRunnable> mTileRenderRunnableWeakReference;
+  private WeakReference<BitmapRecycler> mBitmapRecyclerReference;
 
   public Tile( int column, int row, int width, int height, Object data, DetailLevel detailLevel ) {
     mRow = row;
@@ -71,15 +75,7 @@ public class Tile {
     mData = data;
     mDetailLevel = detailLevel;
     mDetailLevelScale = mDetailLevel.getScale();
-    mIntrinsicRect.set( 0, 0, mWidth, mHeight );
-    mBaseRect.set( mLeft, mTop, mRight, mBottom );
-    mRelativeRect.set(
-            FloatMathHelper.unscale( mLeft, mDetailLevelScale ),
-            FloatMathHelper.unscale( mTop, mDetailLevelScale ),
-            FloatMathHelper.unscale( mRight, mDetailLevelScale ),
-            FloatMathHelper.unscale( mBottom, mDetailLevelScale )
-    );
-    mScaledRect.set( mRelativeRect );
+    updateRects();
   }
 
   public int getWidth() {
@@ -143,12 +139,24 @@ public class Tile {
 
   public Rect getScaledRect( float scale ) {
     mScaledRect.set(
-            (int) (mRelativeRect.left * scale),
-            (int) (mRelativeRect.top * scale),
-            (int) (mRelativeRect.right * scale),
-            (int) (mRelativeRect.bottom * scale)
+      (int) (mRelativeRect.left * scale),
+      (int) (mRelativeRect.top * scale),
+      (int) (mRelativeRect.right * scale),
+      (int) (mRelativeRect.bottom * scale)
     );
     return mScaledRect;
+  }
+
+  private void updateRects() {
+    mIntrinsicRect.set( 0, 0, mWidth, mHeight );
+    mBaseRect.set( mLeft, mTop, mRight, mBottom );
+    mRelativeRect.set(
+      FloatMathHelper.unscale( mLeft, mDetailLevelScale ),
+      FloatMathHelper.unscale( mTop, mDetailLevelScale ),
+      FloatMathHelper.unscale( mRight, mDetailLevelScale ),
+      FloatMathHelper.unscale( mBottom, mDetailLevelScale )
+    );
+    mScaledRect.set( mRelativeRect );
   }
 
   public void setTransitionDuration( int transitionDuration ) {
@@ -164,12 +172,17 @@ public class Tile {
   }
 
   public void execute( TileRenderPoolExecutor tileRenderPoolExecutor ) {
+    execute( tileRenderPoolExecutor, null );
+  }
+
+  public void execute( TileRenderPoolExecutor tileRenderPoolExecutor, BitmapRecycler recycler ) {
     if(mState != State.UNASSIGNED){
       return;
     }
     mState = State.PENDING_DECODE;
     TileRenderRunnable runnable = new TileRenderRunnable();
     mTileRenderRunnableWeakReference = new WeakReference<>( runnable );
+    mBitmapRecyclerReference = new WeakReference<>( recycler );
     runnable.setTile( this );
     runnable.setTileRenderPoolExecutor( tileRenderPoolExecutor );
     tileRenderPoolExecutor.execute( runnable );
@@ -223,6 +236,11 @@ public class Tile {
       return;
     }
     mBitmap = bitmapProvider.getBitmap( this, context );
+    mWidth = mBitmap.getWidth();
+    mHeight = mBitmap.getHeight();
+    mRight = mLeft + mWidth;
+    mBottom = mTop + mHeight;
+    updateRects();
     mState = State.DECODED;
   }
 
@@ -245,8 +263,11 @@ public class Tile {
     }
     mState = State.UNASSIGNED;
     mRenderTimeStamp = null;
-    if( mBitmap != null && !mBitmap.isRecycled() ) {
-      mBitmap.recycle();
+    if( mBitmap != null ) {
+      BitmapRecycler recycler = mBitmapRecyclerReference.get();
+      if( recycler != null ) {
+        recycler.recycleBitmap( mBitmap );
+      }
     }
     mBitmap = null;
   }
@@ -255,7 +276,7 @@ public class Tile {
    * @param canvas The canvas the tile's bitmap should be drawn into
    */
   public void draw( Canvas canvas ) {
-    if( mBitmap != null ) {
+    if( mBitmap != null && !mBitmap.isRecycled() ) {
       canvas.drawBitmap( mBitmap, mIntrinsicRect, mRelativeRect, getPaint() );
     }
   }

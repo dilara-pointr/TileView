@@ -21,7 +21,7 @@ public class DetailLevel implements Comparable<DetailLevel> {
 
   private Set<Tile> mTilesVisibleInViewport = new HashSet<>();
 
-  public DetailLevel(DetailLevelManager detailLevelManager, float scale, Object data, int tileWidth, int tileHeight ) {
+  public DetailLevel( DetailLevelManager detailLevelManager, float scale, Object data, int tileWidth, int tileHeight ) {
     mDetailLevelManager = detailLevelManager;
     mScale = scale;
     mData = data;
@@ -138,8 +138,8 @@ public class DetailLevel implements Comparable<DetailLevel> {
   public static class StateNotComputedException extends IllegalStateException {
     public StateNotComputedException() {
       super( "Grid has not been computed; " +
-              "you must call computeCurrentState at some point prior to calling " +
-              "getVisibleTilesFromLastViewportComputation." );
+        "you must call computeCurrentState at some point prior to calling " +
+        "getVisibleTilesFromLastViewportComputation." );
     }
   }
 

@@ -19,6 +19,7 @@ import com.qozix.tileview.detail.DetailLevel;
 import com.qozix.tileview.detail.DetailLevelManager;
 import com.qozix.tileview.geom.CoordinateTranslater;
 import com.qozix.tileview.geom.FloatMathHelper;
+import com.qozix.tileview.graphics.BitmapRecycler;
 import com.qozix.tileview.graphics.BitmapProvider;
 import com.qozix.tileview.hotspots.HotSpot;
 import com.qozix.tileview.hotspots.HotSpotManager;
@@ -304,27 +305,39 @@ public class TileView extends ZoomPanLayout implements
         mTileCanvasViewGroup.setBitmapProvider( bitmapProvider );
     }
 
-    /**
-     * Defines whether tile bitmaps should be rendered using an AlphaAnimation
-     *
-     * @param enabled True if the TileView should render tiles with fade transitions
-     */
-    public void setTransitionsEnabled( boolean enabled ) {
-        mTileCanvasViewGroup.setTransitionsEnabled( enabled );
-    }
+  /**
+   * Sets a custom class to perform the Bitmap finalization on Tile#reset.
+   * By default, a BitmapRecycler implementation is provided that calls Bitmap#recycle, but
+   * alternative implementations could be used that recycle Bitmap instances to prevent garbage
+   * collection or do other things after the Bitmap is no longer needed for rendering.
+   *
+   * @param bitmapRecycler A class instance that implements BitmapRecycler and must define a recycleBitmap method, which accepts a Bitmap after it is no longer being used
+   */
+  public void setBitmapRecycler( BitmapRecycler bitmapRecycler ) {
+    mTileCanvasViewGroup.setBitmapRecycler( bitmapRecycler );
+  }
 
-    /**
-     * Instructs Tile instances to recycle (or not).  This can be useful if using a caching system
-     * that re-uses bitmaps and expects them to not have been recycled.
-     *
-     * The default value is true.
-     *
-     * @deprecated This value is no longer considered - bitmaps are always recycled when they're no longer used.
-     * @param shouldRecycleBitmaps True if bitmaps should call Bitmap.recycle when they are removed from view.
-     */
-    public void setShouldRecycleBitmaps( boolean shouldRecycleBitmaps ) {
-        mTileCanvasViewGroup.setShouldRecycleBitmaps( shouldRecycleBitmaps );
-    }
+  /**
+   * Defines whether tile bitmaps should be rendered using an AlphaAnimation
+   *
+   * @param enabled True if the TileView should render tiles with fade transitions
+   */
+  public void setTransitionsEnabled( boolean enabled ) {
+    mTileCanvasViewGroup.setTransitionsEnabled( enabled );
+  }
+
+  /**
+   * Instructs Tile instances to recycle (or not).  This can be useful if using a caching system
+   * that re-uses bitmaps and expects them to not have been recycled.
+   *
+   * The default value is true.
+   *
+   * @deprecated This value is no longer considered - bitmaps are always recycled when they're no longer used.
+   * @param shouldRecycleBitmaps True if bitmaps should call Bitmap.recycle when they are removed from view.
+   */
+  public void setShouldRecycleBitmaps( boolean shouldRecycleBitmaps ) {
+    mTileCanvasViewGroup.setShouldRecycleBitmaps( shouldRecycleBitmaps );
+  }
 
     /**
      * Defines the total size, in pixels, of the tile set at 100% scale.
