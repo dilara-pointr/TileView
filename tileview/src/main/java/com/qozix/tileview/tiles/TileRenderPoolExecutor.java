@@ -1,8 +1,6 @@
 package com.qozix.tileview.tiles;
 
-import android.content.Context;
-
-import com.qozix.tileview.graphics.BitmapProvider;
+import android.os.Handler;
 
 import java.lang.ref.WeakReference;
 import java.util.Set;
@@ -25,35 +23,27 @@ public class TileRenderPoolExecutor extends ThreadPoolExecutor {
 
   public TileRenderPoolExecutor() {
     super(
-      INITIAL_POOL_SIZE,
-      MAXIMUM_POOL_SIZE,
-      KEEP_ALIVE_TIME,
-      KEEP_ALIVE_TIME_UNIT,
-      new LinkedBlockingDeque<Runnable>()
+            INITIAL_POOL_SIZE,
+            MAXIMUM_POOL_SIZE,
+            KEEP_ALIVE_TIME,
+            KEEP_ALIVE_TIME_UNIT,
+            new LinkedBlockingDeque<Runnable>()
     );
   }
 
-  public void queue( TileCanvasViewGroup tileCanvasViewGroup, Set<Tile> renderSet ) {
+  public void queue(TileCanvasViewGroup tileCanvasViewGroup, Set<Tile> renderSet ) {
     mTileCanvasViewGroupWeakReference = new WeakReference<>( tileCanvasViewGroup );
     mHandler.setTileCanvasViewGroup( tileCanvasViewGroup );
-    final Context context = tileCanvasViewGroup.getContext();
-    final BitmapProvider bitmapProvider = tileCanvasViewGroup.getBitmapProvider();
     tileCanvasViewGroup.onRenderTaskPreExecute();
     for( Runnable runnable : getQueue() ) {
-      if( runnable instanceof TileRenderRunnable ) {
+      if( runnable instanceof TileRenderRunnable) {
         TileRenderRunnable tileRenderRunnable = (TileRenderRunnable) runnable;
         if( tileRenderRunnable.isDone() || tileRenderRunnable.isCancelled() ) {
           continue;
         }
         Tile tile = tileRenderRunnable.getTile();
-        if( tile == null ) {
-          continue;
-        }
-        if( renderSet.contains( tile ) ) {
-          renderSet.remove( tile );
-        } else {
-          tileRenderRunnable.cancel( true );
-          remove( tileRenderRunnable );
+        if( tile != null &&  !renderSet.contains( tile ) ) {
+          tile.reset();
         }
       }
     }
@@ -61,13 +51,19 @@ public class TileRenderPoolExecutor extends ThreadPoolExecutor {
       if( isShutdownOrTerminating() ) {
         return;
       }
-      TileRenderRunnable runnable = new TileRenderRunnable();
-      runnable.setTile( tile );
-      runnable.setContext( context );
-      runnable.setBitmapProvider( bitmapProvider );
-      runnable.setHandler( mHandler );
-      execute( runnable );
+      tile.execute( this );
     }
+  }
+
+  public Handler getHandler(){
+    return mHandler;
+  }
+
+  public TileCanvasViewGroup getTileCanvasViewGroup(){
+    if( mTileCanvasViewGroupWeakReference == null ) {
+      return null;
+    }
+    return mTileCanvasViewGroupWeakReference.get();
   }
 
   private void broadcastCancel() {
@@ -81,9 +77,13 @@ public class TileRenderPoolExecutor extends ThreadPoolExecutor {
 
   public void cancel() {
     for( Runnable runnable : getQueue() ) {
-      if( runnable instanceof TileRenderRunnable ) {
+      if( runnable instanceof TileRenderRunnable) {
         TileRenderRunnable tileRenderRunnable = (TileRenderRunnable) runnable;
         tileRenderRunnable.cancel( true );
+        Tile tile = tileRenderRunnable.getTile();
+        if( tile != null ) {
+          tile.reset();
+        }
       }
     }
     getQueue().clear();

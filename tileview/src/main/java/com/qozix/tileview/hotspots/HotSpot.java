@@ -24,12 +24,12 @@ public class HotSpot extends Region {
   }
 
   public interface HotSpotTapListener {
-    void onHotSpotTap( HotSpot hotSpot, int x, int y );
+    void onHotSpotTap(HotSpot hotSpot, int x, int y);
   }
 
   @Override
   public boolean equals( Object obj ) {
-    if( obj instanceof HotSpot ) {
+    if( obj instanceof HotSpot) {
       HotSpot hotSpot = (HotSpot) obj;
       return super.equals( hotSpot ) && hotSpot.mHotSpotTapListener == mHotSpotTapListener;
     }

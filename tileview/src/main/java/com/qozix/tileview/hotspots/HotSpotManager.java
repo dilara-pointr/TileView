@@ -36,7 +36,7 @@ public class HotSpotManager {
     mHotSpots.clear();
   }
 
-  private HotSpot getMatch( int x, int y ) {
+  private HotSpot getMatch(int x, int y ) {
     int scaledX = FloatMathHelper.unscale( x, mScale );
     int scaledY = FloatMathHelper.unscale( y, mScale );
     Iterator<HotSpot> iterator = mHotSpots.descendingIterator();

@@ -15,5 +15,5 @@ import com.qozix.tileview.tiles.Tile;
  * getBitmap method returns a bitmap, everything will run along nicely.
  */
 public interface BitmapProvider {
-  Bitmap getBitmap( Tile tile, Context context );
+  Bitmap getBitmap(Tile tile, Context context);
 }

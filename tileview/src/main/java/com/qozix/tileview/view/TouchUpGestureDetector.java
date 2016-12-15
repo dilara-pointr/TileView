@@ -23,7 +23,7 @@ public class TouchUpGestureDetector {
   }
 
   public interface OnTouchUpListener {
-    boolean onTouchUp( MotionEvent event );
+    boolean onTouchUp(MotionEvent event);
   }
 }
 

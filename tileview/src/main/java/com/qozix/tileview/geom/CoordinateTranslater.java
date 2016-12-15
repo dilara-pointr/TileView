@@ -204,9 +204,9 @@ public class CoordinateTranslater {
       right = mLeft;
     }
     return y >= top
-      && y <= bottom
-      && x >= left
-      && x <= right;
+            && y <= bottom
+            && x >= left
+            && x <= right;
   }
 
   /**

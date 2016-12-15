@@ -26,7 +26,7 @@ public class BitmapProviderAssets implements BitmapProvider {
   }
 
   @Override
-  public Bitmap getBitmap( Tile tile, Context context ) {
+  public Bitmap getBitmap(Tile tile, Context context ) {
     Object data = tile.getData();
     if( data instanceof String ) {
       String unformattedFileName = (String) tile.getData();

@@ -5,13 +5,16 @@ import android.graphics.Rect;
 import com.qozix.tileview.geom.FloatMathHelper;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 public class DetailLevelManager {
 
   protected LinkedList<DetailLevel> mDetailLevelLinkedList = new LinkedList<DetailLevel>();
 
   private DetailLevelChangeListener mDetailLevelChangeListener;
+  private Set<ScaleChangeListener> mScaleChangeListener = new HashSet<>();
 
   protected float mScale = 1;
 
@@ -26,6 +29,7 @@ public class DetailLevelManager {
 
   private Rect mViewport = new Rect();
   private Rect mComputedViewport = new Rect();
+  private Rect mComputedScaledViewport = new Rect();
 
   private DetailLevel mCurrentDetailLevel;
 
@@ -39,6 +43,7 @@ public class DetailLevelManager {
 
   public void setScale( float scale ) {
     mScale = scale;
+    notifyScaleChange();
     update();
   }
 
@@ -62,6 +67,14 @@ public class DetailLevelManager {
     mBaseWidth = width;
     mBaseHeight = height;
     update();
+  }
+
+  public synchronized void addScaleChangeListener(ScaleChangeListener scaleChangeListener) {
+    mScaleChangeListener.add(scaleChangeListener);
+  }
+
+  public synchronized void removeScaleChangeListener(ScaleChangeListener scaleChangeListener) {
+    mScaleChangeListener.remove(scaleChangeListener);
   }
 
   public void setDetailLevelChangeListener( DetailLevelChangeListener detailLevelChangeListener ) {
@@ -101,6 +114,16 @@ public class DetailLevelManager {
     return mComputedViewport;
   }
 
+  public Rect getComputedScaledViewport(float scale){
+    mComputedScaledViewport.set(
+            (int) (mComputedViewport.left * scale),
+            (int) (mComputedViewport.top * scale),
+            (int) (mComputedViewport.right * scale),
+            (int) (mComputedViewport.bottom * scale)
+    );
+    return mComputedScaledViewport;
+  }
+
   /**
    * While the detail level is locked (after this method is invoked, and before unlockDetailLevel is invoked),
    * the DetailLevel will not change, and the current DetailLevel will be scaled beyond the normal
@@ -116,6 +139,10 @@ public class DetailLevelManager {
    */
   public void unlockDetailLevel() {
     mDetailLevelLocked = false;
+  }
+
+  public boolean getIsLocked() {
+    return mDetailLevelLocked;
   }
 
   public void resetDetailLevels() {
@@ -182,8 +209,18 @@ public class DetailLevelManager {
     }
   }
 
-  public interface DetailLevelChangeListener {
-    void onDetailLevelChanged( DetailLevel detailLevel );
+  private void notifyScaleChange() {
+    for (ScaleChangeListener listener :
+            mScaleChangeListener) {
+      listener.onScaleChanged(mScale);
+    }
   }
 
+  public interface DetailLevelChangeListener {
+    void onDetailLevelChanged(DetailLevel detailLevel);
+  }
+
+  public interface ScaleChangeListener {
+    void onScaleChanged(float scale);
+  }
 }
