@@ -1,18 +1,34 @@
 // credit https://raw.githubusercontent.com/blundell/release-android-library/master/android-release-aar.gradle
-// run ./gradlew clean build generateRelease
+// run ./gradlew clean generateRelease artifactoryPublish
 
-apply plugin: 'maven'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'maven-publish'
 
-def groupId = 'com.qozix'
-def artifactId = 'tileview'
-def version = android.defaultConfig.versionName
+def libraryGroupId = 'com.pointrlabs'
+def libraryArtifactId = 'tileview'
+def libraryVersion = android.defaultConfig.versionName
 
 def localReleaseDest = "${buildDir}/release/${version}"
+
+publishing {
+    publications {
+        aar(MavenPublication) {
+            groupId libraryGroupId
+            version libraryVersion
+            artifactId libraryArtifactId
+
+            artifact("$buildDir/outputs/aar/${artifactId}-release.aar")
+            artifact androidJavadocsJar
+            artifact androidSourcesJar
+        }
+    }
+}
 
 task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
     classpath += files(ext.androidJar)
+    failOnError false
 }
 
 task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
@@ -25,13 +41,22 @@ task androidSourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
-uploadArchives {
-    repositories.mavenDeployer {
-        pom.groupId = groupId
-        pom.artifactId = artifactId
-        pom.version = version
-        // Add other pom properties here if you want (developer details / licenses)
-        repository(url: "file://${localReleaseDest}")
+artifactory {
+    contextUrl = 'http://52.166.132.67:8081/artifactory'
+    publish {
+        repository {
+            repoKey = 'gradle-release-local'
+
+            username = artifactory_username
+            password = artifactory_password
+        }
+        defaults {
+            publications('aar')
+            publishArtifacts = true
+
+            properties = ['qa.level': 'basic', 'q.os': 'android', 'dev.team': 'core']
+            publishPom = true
+        }
     }
 }
 
@@ -41,15 +66,15 @@ task zipRelease(type: Zip) {
     archiveName "release-${version}.zip"
 }
 
-task generateRelease << {
+task generateRelease() << {
     println "Release ${version} can be found at ${localReleaseDest}/"
     println "Release ${version} zipped can be found ${buildDir}/release-${version}.zip"
 }
 
-generateRelease.dependsOn(uploadArchives)
+//generateRelease.dependsOn(assembleRelease)
 generateRelease.dependsOn(zipRelease)
 
 artifacts {
     archives androidSourcesJar
-    //archives androidJavadocsJar
+    archives androidJavadocsJar
 }
