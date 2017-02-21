@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.util.DisplayMetrics;
 import android.view.View;
 
 import java.util.HashSet;
@@ -17,7 +18,7 @@ public class BasicPathView extends View {
     private static final int DEFAULT_STROKE_WIDTH = 10;
     private float mScale = 1;
     private int dotRadius = 12;
-    private int dotInterval = 60;
+    private int dotInterval = 48;
     private boolean mShouldDraw = true;
     private PathMode mode = PathMode.Lined;
     private Matrix mMatrix = new Matrix();
@@ -34,6 +35,9 @@ public class BasicPathView extends View {
     public BasicPathView(Context context) {
         super(context);
         setWillNotDraw(false);
+        int densityRatio = getResources().getDisplayMetrics().densityDpi / DisplayMetrics.DENSITY_DEFAULT;
+        dotInterval = 16 * densityRatio;
+        dotRadius = 4 * densityRatio;
     }
 
     public int getDotRadius() {

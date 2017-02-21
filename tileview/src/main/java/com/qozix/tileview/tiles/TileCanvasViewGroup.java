@@ -16,6 +16,7 @@ import com.qozix.tileview.graphics.BitmapProvider;
 import com.qozix.tileview.graphics.BitmapProviderAssets;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -343,6 +344,7 @@ public class TileCanvasViewGroup extends ViewGroup {
 
   public void updateTileSet( DetailLevel detailLevel ) {
     if( detailLevel == null ) {
+      mDetailLevelToRender = null;
       return;
     }
     if( detailLevel.equals( mDetailLevelToRender ) ) {
