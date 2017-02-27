@@ -71,8 +71,8 @@ task generateRelease() << {
     println "Release ${version} zipped can be found ${buildDir}/release-${version}.zip"
 }
 
-//generateRelease.dependsOn(assembleRelease)
-generateRelease.dependsOn(zipRelease)
+generateRelease.dependsOn('assembleRelease')
+generateRelease.dependsOn('zipRelease')
 
 artifacts {
     archives androidSourcesJar
