@@ -3,9 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/android-tileview.iml" filepath="$PROJECT_DIR$/android-tileview.iml" />
-      <module fileurl="file://$PROJECT_DIR$/android-tileview.iml" filepath="$PROJECT_DIR$/android-tileview.iml" />
       <module fileurl="file://$PROJECT_DIR$/demo/demo.iml" filepath="$PROJECT_DIR$/demo/demo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/demo/demo.iml" filepath="$PROJECT_DIR$/demo/demo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tileview/tileview.iml" filepath="$PROJECT_DIR$/tileview/tileview.iml" />
       <module fileurl="file://$PROJECT_DIR$/tileview/tileview.iml" filepath="$PROJECT_DIR$/tileview/tileview.iml" />
       <module fileurl="file://$PROJECT_DIR$/tileview/tileview.iml" filepath="$PROJECT_DIR$/tileview/tileview.iml" />
     </modules>
