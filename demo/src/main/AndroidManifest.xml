@@ -16,7 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ScrollViewDemo" />
+        <activity android:name=".ScrollViewDemoUniversal" />
+        <activity android:name=".ScrollViewDemoVertical" />
+        <activity android:name=".ScrollViewDemoHorizontal" />
     </application>
 
 </manifest>

@@ -11,10 +11,22 @@ public class MainActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
-    findViewById(R.id.textview_demos_scrollview).setOnClickListener(new View.OnClickListener() {
+    findViewById(R.id.textview_demos_scrollview_vertical).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        startDemo(ScrollViewDemo.class);
+        startDemo(ScrollViewDemoVertical.class);
+      }
+    });
+    findViewById(R.id.textview_demos_scrollview_horizontal).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        startDemo(ScrollViewDemoHorizontal.class);
+      }
+    });
+    findViewById(R.id.textview_demos_scrollview_universal).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        startDemo(ScrollViewDemoUniversal.class);
       }
     });
   }
