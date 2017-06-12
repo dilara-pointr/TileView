@@ -2,83 +2,21 @@
             xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context=".TileViewDemoActivity" >
+            tools:context=".MainActivity">
 
-    <LinearLayout
-      android:orientation="vertical"
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+      android:id="@+id/textview_demos_scrollview"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+      android:layout_height="wrap_content"
+      android:padding="10dp"
+      android:text="ScrollView Demo"
+      android:textSize="20dp" />
 
-        <TextView
-          android:padding="20dp"
-          android:id="@+id/show_image"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:textSize="20sp"
-          android:gravity="center"
-          android:text="Large Image" />
-
-        <View
-          android:layout_width="match_parent"
-          android:layout_height="1dp"
-          android:background="#FFCCCCCC"
-          />
-
-        <TextView
-          android:padding="20dp"
-          android:id="@+id/show_plans"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:textSize="20sp"
-          android:gravity="center"
-          android:text="Building Plans" />
-
-        <View
-          android:layout_width="match_parent"
-          android:layout_height="1dp"
-          android:background="#FFCCCCCC"
-          />
-
-        <TextView
-          android:padding="20dp"
-          android:id="@+id/show_fiction"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:textSize="20sp"
-          android:gravity="center"
-          android:text="Fictional Map" />
-
-        <View
-          android:layout_width="match_parent"
-          android:layout_height="1dp"
-          android:background="#FFCCCCCC"
-          />
-
-        <TextView
-          android:padding="20dp"
-          android:id="@+id/show_map"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:textSize="20sp"
-          android:gravity="center"
-          android:text="Real Map" />
-
-        <View
-          android:layout_width="match_parent"
-          android:layout_height="1dp"
-          android:background="#FFCCCCCC"
-          />
-
-        <TextView
-          android:padding="20dp"
-          android:id="@+id/show_internet"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:textSize="20sp"
-          android:gravity="center"
-          android:text="Real Map Http" />
-
-    </LinearLayout>
-
+  </LinearLayout>
 
 </ScrollView>

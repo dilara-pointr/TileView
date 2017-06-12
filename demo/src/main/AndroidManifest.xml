@@ -16,11 +16,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".BuildingPlansTileViewActivity" />
-        <activity android:name=".FictionalMapTileViewActivity" />
-        <activity android:name=".LargeImageTileViewActivity" />
-        <activity android:name=".RealMapTileViewActivity" />
-        <activity android:name=".RealMapInternetTileViewActivity" />
+        <activity android:name=".ScrollViewDemo" />
     </application>
 
 </manifest>
