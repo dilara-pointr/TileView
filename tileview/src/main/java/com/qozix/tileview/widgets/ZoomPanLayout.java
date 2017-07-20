@@ -40,6 +40,19 @@ public class ZoomPanLayout extends ViewGroup implements
   private int mScaledWidth;
   private int mScaledHeight;
 
+
+  //Constrained view for levels of venue with smaller space.
+  private int mConstraintScaledMaxWidth;
+  private int mConstraintScaledMinWidth;
+  private int mConstraintScaledMaxHeight;
+  private int mConstraintScaledMinHeight;
+
+  private int mConstraintMaxWidth;
+  private int mConstraintMinWidth;
+  private int mConstraintMaxHeight;
+  private int mConstraintMinHeight;
+  private boolean isConstraint = false;
+
   private float mScale = 1;
 
   private float mMinScale = 0;
@@ -135,9 +148,14 @@ public class ZoomPanLayout extends ViewGroup implements
   protected void onLayout( boolean changed, int l, int t, int r, int b ) {
     final int width = getWidth();
     final int height = getHeight();
+    if(isConstraint){
+          mOffsetX = (mConstraintScaledMaxWidth - mConstraintMinWidth) >= width ? 0 : width / 2 -(mConstraintScaledMaxWidth - mConstraintMinWidth) / 2;
+          mOffsetY = (mConstraintScaledMaxHeight - mConstraintMinHeight) >= height ? 0 : height / 2 - (mConstraintScaledMaxHeight - mConstraintMinHeight)  / 2;
+    }else{
+          mOffsetX = mScaledWidth >= width ? 0 : width / 2 - mScaledWidth / 2;
+          mOffsetY = mScaledHeight >= height ? 0 : height / 2 - mScaledHeight / 2;
+    }
 
-    mOffsetX = mScaledWidth >= width ? 0 : width / 2 - mScaledWidth / 2;
-    mOffsetY = mScaledHeight >= height ? 0 : height / 2 - mScaledHeight / 2;
 
     for( int i = 0; i < getChildCount(); i++ ) {
       View child = getChildAt( i );
@@ -209,12 +227,55 @@ public class ZoomPanLayout extends ViewGroup implements
     requestLayout();
   }
 
-  /**
+  public void setConstraintSize(float minWidth,float maxWidth,float minHeight,float maxHeight){
+    mConstraintMinWidth = FloatMathHelper.scale(mBaseWidth,minWidth);
+    mConstraintMaxWidth = FloatMathHelper.scale(mBaseWidth,maxWidth);
+    mConstraintMinHeight = FloatMathHelper.scale(mBaseHeight,minHeight);
+    mConstraintMaxHeight = FloatMathHelper.scale(mBaseHeight,maxHeight);
+    isConstraint = true;
+    updateScaledDimensions();
+    calculateMinimumScaleToFit();
+    constrainScrollToLimits();
+    requestLayout();
+  }
+
+  public void unsetConstraintSize(){
+    mConstraintMinWidth = 0;
+    mConstraintMaxWidth = mBaseWidth;
+    mConstraintMinHeight = 0;
+    mConstraintMaxHeight = mBaseHeight;
+    isConstraint = false;
+    updateScaledDimensions();
+    calculateMinimumScaleToFit();
+    constrainScrollToLimits();
+    requestLayout();
+  }
+
+    public int getmConstraintMaxWidth() {
+        return mConstraintMaxWidth;
+    }
+
+    public int getmConstraintMinWidth() {
+        return mConstraintMinWidth;
+    }
+
+    public int getmConstraintMaxHeight() {
+        return mConstraintMaxHeight;
+    }
+
+    public int getmConstraintMinHeight() {
+        return mConstraintMinHeight;
+    }
+
+    /**
    * Returns the base (not scaled) width of the underlying composite image.
    *
    * @return The base (not scaled) width of the underlying composite image.
    */
   public int getBaseWidth() {
+      if(isConstraint){
+          return mConstraintMaxWidth - mConstraintMinWidth;
+      }
     return mBaseWidth;
   }
 
@@ -224,7 +285,11 @@ public class ZoomPanLayout extends ViewGroup implements
    * @return The base (not scaled) height of the underlying composite image.
    */
   public int getBaseHeight() {
-    return mBaseHeight;
+
+      if(isConstraint){
+          return mConstraintMaxHeight - mConstraintMinHeight;
+      }
+      return mBaseHeight;
   }
 
   /**
@@ -516,6 +581,13 @@ public class ZoomPanLayout extends ViewGroup implements
   private void updateScaledDimensions() {
     mScaledWidth = FloatMathHelper.scale( mBaseWidth, mScale );
     mScaledHeight = FloatMathHelper.scale( mBaseHeight, mScale );
+    if(isConstraint){
+      mConstraintScaledMinWidth = FloatMathHelper.scale( mConstraintMinWidth, mScale );
+      mConstraintScaledMaxWidth = FloatMathHelper.scale( mConstraintMaxWidth, mScale );
+      mConstraintScaledMinHeight = FloatMathHelper.scale( mConstraintMinHeight, mScale );
+      mConstraintScaledMaxHeight = FloatMathHelper.scale( mConstraintMaxHeight, mScale );
+    }
+
   }
 
   protected ZoomPanAnimator getAnimator() {
@@ -580,15 +652,28 @@ public class ZoomPanLayout extends ViewGroup implements
   }
 
   private void calculateMinimumScaleToFit() {
-    float minimumScaleX = getWidth() / (float) mBaseWidth;
-    float minimumScaleY = getHeight() / (float) mBaseHeight;
-    float recalculatedMinScale = calculatedMinScale(minimumScaleX, minimumScaleY);
-    if( recalculatedMinScale != mEffectiveMinScale ) {
-      mEffectiveMinScale = recalculatedMinScale;
-      if( mScale < mEffectiveMinScale ){
-        setScale( mEffectiveMinScale );
+    if(isConstraint){
+      float minimumScaleX = getWidth() / (float) (mConstraintMaxWidth - mConstraintMinWidth);
+      float minimumScaleY = getHeight() / (float) (mConstraintMaxHeight - mConstraintMinHeight);
+      float recalculatedMinScale = calculatedMinScale(minimumScaleX, minimumScaleY);
+      if( recalculatedMinScale != mEffectiveMinScale ) {
+        mEffectiveMinScale = recalculatedMinScale;
+        if( mScale < mEffectiveMinScale ){
+          setScale( mEffectiveMinScale );
+        }
+      }
+    }else{
+      float minimumScaleX = getWidth() / (float) mBaseWidth;
+      float minimumScaleY = getHeight() / (float) mBaseHeight;
+      float recalculatedMinScale = calculatedMinScale(minimumScaleX, minimumScaleY);
+      if( recalculatedMinScale != mEffectiveMinScale ) {
+        mEffectiveMinScale = recalculatedMinScale;
+        if( mScale < mEffectiveMinScale ){
+          setScale( mEffectiveMinScale );
+        }
       }
     }
+
   }
 
   private float calculatedMinScale( float minimumScaleX, float minimumScaleY ) {
@@ -617,18 +702,31 @@ public class ZoomPanLayout extends ViewGroup implements
   }
 
   protected int getScrollLimitX() {
+    if(isConstraint){
+      return mConstraintScaledMaxWidth - getWidth();
+    }
     return mScaledWidth - getWidth();
+
   }
 
   protected int getScrollLimitY() {
+    if(isConstraint){
+      return mConstraintScaledMaxHeight - getHeight();
+    }
     return mScaledHeight - getHeight();
   }
 
   protected int getScrollMinX(){
+    if(isConstraint){
+      return mConstraintScaledMinWidth;
+    }
     return 0;
   }
 
   protected int getScrollMinY(){
+    if(isConstraint){
+      return mConstraintScaledMinHeight;
+    }
     return 0;
   }
 
